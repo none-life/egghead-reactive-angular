@@ -1,7 +1,8 @@
 import {Project} from '@workshop/core-data';
 import {ProjectActions, ProjectsActionsTypes} from "./projects.actions";
+import {createEntityAdapter, EntityAdapter, EntityState, Update} from "@ngrx/entity";
 
-const initialProjects: Project[] = [
+export const initialProjects: Project[] = [
   {
     id: '1',
     title: 'Project One',
@@ -34,48 +35,39 @@ const updateProject = (projects, project) => projects.map(p => {
 });
 const deleteProject = (projects, project) => projects.filter(w => project.id !== w.id);
 
-export interface ProjectsState {
-  projects: Project[]
+export interface ProjectsState extends EntityState<Project> {
   selectedProjectId?: string
 }
 
-export const initialState: ProjectsState = {
-  projects: initialProjects
-}
+export const adapter: EntityAdapter<Project> = createEntityAdapter()
+export const initialState: ProjectsState = adapter.getInitialState()
 
 export function projectsReducer(
   state = initialState,
   action: ProjectActions
 ): ProjectsState {
-  let projects: Project[] = []
-
   switch (action.type) {
+    case ProjectsActionsTypes.select:
+      const selectedProjectId = action.selectedProjectId;
+      return {
+        ...state,
+        selectedProjectId
+      }
+    case ProjectsActionsTypes.load:
+      return adapter.addMany(action.projects, state)
     case ProjectsActionsTypes.create:
       const project = action.project;
-      project.id = (Math.max(...state.projects.map(it => Number.parseInt(it.id))) + 1).toString()
-
-      projects = createProject(state.projects, project)
-      return {
-        ...state,
-        projects
-      }
-    case ProjectsActionsTypes.select:
-      return {
-        ...state,
-        selectedProjectId: action.selectedProjectId
-      }
+      project.id = (Math.max(...(<string[]>state.ids).map(it => Number.parseInt(it))) + 1).toString()
+      return adapter.addOne(project, state)
     case ProjectsActionsTypes.update:
-      projects = updateProject(state.projects, action.project)
-      return {
-        ...state,
-        projects
+      const update: Update<Project> = {
+        id: action.project.id,
+        changes: action.project
       }
+
+      return adapter.updateOne(update, state)
     case ProjectsActionsTypes.delete:
-      projects = deleteProject(state.projects, action.project)
-      return {
-        ...state,
-        projects
-      }
+      return adapter.removeOne(action.selectedProjectId, state)
     default:
       return state;
   }

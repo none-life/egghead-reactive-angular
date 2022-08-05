@@ -5,7 +5,7 @@ import {
   Project,
   ProjectsService,
   NotificationsService,
-  CustomersService, AppState, ProjectActions,
+  CustomersService, AppState, ProjectActions, initialProjects,
 } from '@workshop/core-data';
 import {select, Store} from "@ngrx/store";
 import {map} from "rxjs/operators";
@@ -39,18 +39,22 @@ export class ProjectsComponent implements OnInit {
   ) {
     this.projects$ = store.pipe(
       select('projects'),
-      map(it => it.projects)
+      map(it => it.entities),
+      map(it => Object.keys(it).map((k => it[k])))
     );
     this.project$ = store.pipe(
       select('projects'),
       map(state => {
-        return state.projects.find(project => project.id === state.selectedProjectId) || emptyProject();
+        return state.ids.includes(<string & number>state.selectedProjectId)
+          ? state.entities[state.selectedProjectId]
+          : emptyProject()
       })
     )
   }
 
   ngOnInit() {
     this.getCustomers();
+    this.getProjects();
   }
 
   resetCurrentProject() {
@@ -89,6 +93,10 @@ export class ProjectsComponent implements OnInit {
     this.store.dispatch(ProjectActions.Delete(project))
     this.ns.emit('Project deleted!');
     this.resetCurrentProject();
+  }
+
+  private getProjects() {
+    this.store.dispatch(ProjectActions.Load(initialProjects))
   }
 }
 
