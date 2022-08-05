@@ -1,24 +1,24 @@
-import { Observable } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
+import {Observable} from 'rxjs';
+import {Component, OnInit} from '@angular/core';
 import {
   Customer,
   Project,
   ProjectsService,
   NotificationsService,
-  CustomersService,
-  ProjectsState
+  CustomersService, AppState, ProjectActions,
 } from '@workshop/core-data';
 import {select, Store} from "@ngrx/store";
 import {map} from "rxjs/operators";
-import {AppState} from "../../../../../libs/core-data/src/lib/state";
 
-const emptyProject: Project = {
-  id: null,
-  title: '',
-  details: '',
-  percentComplete: 0,
-  approved: false,
-  customerId: null
+const emptyProject = (): Project => {
+  return {
+    id: null,
+    title: '',
+    details: '',
+    percentComplete: 0,
+    approved: false,
+    customerId: null
+  }
 }
 
 @Component({
@@ -29,43 +29,40 @@ const emptyProject: Project = {
 export class ProjectsComponent implements OnInit {
   projects$: Observable<Project[]>;
   customers$: Observable<Customer[]>;
-  currentProject: Project;
+  project$: Observable<Project>;
 
   constructor(
     private projectsService: ProjectsService,
     private customerService: CustomersService,
     private store: Store<AppState>,
-    private ns: NotificationsService) {
+    private ns: NotificationsService
+  ) {
     this.projects$ = store.pipe(
       select('projects'),
       map(it => it.projects)
     );
+    this.project$ = store.pipe(
+      select('projects'),
+      map(state => {
+        return state.projects.find(project => project.id === state.selectedProjectId) || emptyProject();
+      })
+    )
   }
 
   ngOnInit() {
-    this.getProjects();
     this.getCustomers();
-    this.resetCurrentProject();
   }
 
   resetCurrentProject() {
-    this.currentProject = emptyProject;
+    this.store.dispatch(ProjectActions.Select())
   }
 
   selectProject(project) {
-    this.currentProject = project;
-  }
-
-  cancel(project) {
-    this.resetCurrentProject();
+    this.store.dispatch(ProjectActions.Select(project.id))
   }
 
   getCustomers() {
     this.customers$ = this.customerService.all();
-  }
-
-  getProjects() {
-    // this.projects$ = this.projectsService.all();
   }
 
   saveProject(project) {
@@ -77,30 +74,21 @@ export class ProjectsComponent implements OnInit {
   }
 
   createProject(project) {
-    this.projectsService.create(project)
-      .subscribe(response => {
-        this.ns.emit('Project created!');
-        this.getProjects();
-        this.resetCurrentProject();
-      });
+    this.store.dispatch(ProjectActions.Create(project))
+    this.ns.emit('Project created!')
+    this.resetCurrentProject()
   }
 
   updateProject(project) {
-    this.projectsService.update(project)
-      .subscribe(response => {
-        this.ns.emit('Project saved!');
-        this.getProjects();
-        this.resetCurrentProject();
-      });
+    this.store.dispatch(ProjectActions.Update(project))
+    this.ns.emit('Project saved!');
+    this.resetCurrentProject();
   }
 
   deleteProject(project) {
-    this.projectsService.delete(project)
-      .subscribe(response => {
-        this.ns.emit('Project deleted!');
-        this.getProjects();
-        this.resetCurrentProject();
-      });
+    this.store.dispatch(ProjectActions.Delete(project))
+    this.ns.emit('Project deleted!');
+    this.resetCurrentProject();
   }
 }
 

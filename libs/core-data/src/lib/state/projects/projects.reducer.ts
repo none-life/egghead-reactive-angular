@@ -1,4 +1,5 @@
-import { Project } from './../../projects/project.model';
+import {Project} from '@workshop/core-data';
+import {ProjectActions, ProjectsActionsTypes} from "./projects.actions";
 
 const initialProjects: Project[] = [
   {
@@ -44,9 +45,37 @@ export const initialState: ProjectsState = {
 
 export function projectsReducer(
   state = initialState,
-  action
+  action: ProjectActions
 ): ProjectsState {
+  let projects: Project[] = []
+
   switch (action.type) {
+    case ProjectsActionsTypes.create:
+      const project = action.project;
+      project.id = (Math.max(...state.projects.map(it => Number.parseInt(it.id))) + 1).toString()
+
+      projects = createProject(state.projects, project)
+      return {
+        ...state,
+        projects
+      }
+    case ProjectsActionsTypes.select:
+      return {
+        ...state,
+        selectedProjectId: action.selectedProjectId
+      }
+    case ProjectsActionsTypes.update:
+      projects = updateProject(state.projects, action.project)
+      return {
+        ...state,
+        projects
+      }
+    case ProjectsActionsTypes.delete:
+      projects = deleteProject(state.projects, action.project)
+      return {
+        ...state,
+        projects
+      }
     default:
       return state;
   }
