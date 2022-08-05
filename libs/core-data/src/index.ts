@@ -9,4 +9,3 @@ export {ProjectsService} from './lib/projects/projects.service';
 export {CustomersFacade} from './lib/state/customers/customers.facade';
 export {ProjectActions} from './lib/state/projects/projects.actions'
 export {AppState} from './lib/state'
-export {initialProjects} from './lib/state/projects/projects.reducer'

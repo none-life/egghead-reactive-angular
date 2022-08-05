@@ -96,7 +96,7 @@ export class ProjectsComponent implements OnInit {
   }
 
   private getProjects() {
-    this.store.dispatch(ProjectActions.Load(initialProjects))
+    this.store.dispatch(ProjectActions.Load())
   }
 }
 

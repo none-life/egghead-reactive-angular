@@ -1,18 +1,27 @@
-import {Action, createAction, props} from "@ngrx/store";
+import {Action} from "@ngrx/store";
 import {Project} from "@workshop/core-data";
-import {Update} from "@ngrx/entity";
 
 export enum ProjectsActionsTypes {
   select = 'Projects [select]',
   create = 'Projects [create]',
+  didCreate = 'Projects [didCreate]',
   update = 'Projects [update]',
+  didUpdate = 'Projects [didUpdate]',
   delete = 'Projects [delete]',
-  load = 'Projects [load]'
+  didDelete = 'Projects [didDelete]',
+  load = 'Projects [load]',
+  didLoad = 'Projects [didLoad]'
 }
 
 export class ProjectActions implements Action {
-  protected payload: any
-  public type: string;
+  public readonly type: string
+  private constructor(
+    type: ProjectsActionsTypes,
+    protected readonly payload?: any
+  ) {
+    this.type = type.toString()
+  }
+
   public get project(): Project {
     return <Project>this.payload;
   }
@@ -23,38 +32,39 @@ export class ProjectActions implements Action {
     return <string>this.payload;
   }
 
-  public static Load(payload: Project[]) {
-    const action = new ProjectActions()
-    action.payload = payload
-    action.type = ProjectsActionsTypes.load
-    return action;
+  public static Load() {
+    return new ProjectActions(ProjectsActionsTypes.load)
   }
 
   public static Select(payload?: string) {
-    const action = new ProjectActions();
-    action.payload = payload
-    action.type = ProjectsActionsTypes.select
-    return action
+    return new ProjectActions(ProjectsActionsTypes.select, payload)
   }
 
   public static Create(payload: Project) {
-    const action = new ProjectActions();
-    action.payload = payload
-    action.type = ProjectsActionsTypes.create
-    return action
+    return new ProjectActions(ProjectsActionsTypes.create, payload)
   }
 
   public static Update(payload: Project) {
-    const action = new ProjectActions();
-    action.payload = payload
-    action.type = ProjectsActionsTypes.update
-    return action
+    return new ProjectActions(ProjectsActionsTypes.update, payload)
   }
 
   public static Delete(payload: Project) {
-    const action = new ProjectActions();
-    action.payload = payload.id
-    action.type = ProjectsActionsTypes.delete
-    return action
+    return new ProjectActions(ProjectsActionsTypes.delete, payload)
+  }
+
+  public static didLoad(payload: Project[]) {
+    return new ProjectActions(ProjectsActionsTypes.didLoad, payload)
+  }
+
+  public static didCreate(payload: Project) {
+    return new ProjectActions(ProjectsActionsTypes.didCreate, payload)
+  }
+
+  public static didUpdate(payload: Project) {
+    return new ProjectActions(ProjectsActionsTypes.didUpdate, payload)
+  }
+
+  public static didDelete(payload: Project) {
+    return new ProjectActions(ProjectsActionsTypes.didDelete, payload)
   }
 }

@@ -29,12 +29,6 @@ export const initialProjects: Project[] = [
   }
 ];
 
-const createProject = (projects, project) => [...projects, project];
-const updateProject = (projects, project) => projects.map(p => {
-  return p.id === project.id ? Object.assign({}, project) : p;
-});
-const deleteProject = (projects, project) => projects.filter(w => project.id !== w.id);
-
 export interface ProjectsState extends EntityState<Project> {
   selectedProjectId?: string
 }
@@ -53,21 +47,15 @@ export function projectsReducer(
         ...state,
         selectedProjectId
       }
-    case ProjectsActionsTypes.load:
+    case ProjectsActionsTypes.didLoad:
       return adapter.addMany(action.projects, state)
-    case ProjectsActionsTypes.create:
+    case ProjectsActionsTypes.didCreate:
       const project = action.project;
-      project.id = (Math.max(...(<string[]>state.ids).map(it => Number.parseInt(it, 10))) + 1).toString()
       return adapter.addOne(project, state)
-    case ProjectsActionsTypes.update:
-      const update: Update<Project> = {
-        id: action.project.id,
-        changes: action.project
-      }
-
-      return adapter.updateOne(update, state)
-    case ProjectsActionsTypes.delete:
-      return adapter.removeOne(action.selectedProjectId, state)
+    case ProjectsActionsTypes.didUpdate:
+      return adapter.updateOne({id: action.project.id, changes: action.project}, state)
+    case ProjectsActionsTypes.didDelete:
+      return adapter.removeOne(action.project.id, state)
     default:
       return state;
   }
