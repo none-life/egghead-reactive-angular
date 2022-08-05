@@ -1,10 +1,11 @@
 <div class="container">
   <div class="col-50">
-    <app-projects-list
-      [projects]="projects$ | async"
-      (selected)="selectProject($event)"
-      (deleted)="deleteProject($event)">
-    </app-projects-list>
+    <pre>{{projects$ | async | json }}</pre>
+<!--    <app-projects-list-->
+<!--      [projects]="projects$ | async"-->
+<!--      (selected)="selectProject($event)"-->
+<!--      (deleted)="deleteProject($event)">-->
+<!--    </app-projects-list>-->
   </div>
 
   <div class="col-50">
