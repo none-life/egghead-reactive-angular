@@ -53,7 +53,7 @@ export class ProjectActions implements Action {
 
   public static Delete(payload: Project) {
     const action = new ProjectActions();
-    action.payload = payload
+    action.payload = payload.id
     action.type = ProjectsActionsTypes.delete
     return action
   }

@@ -57,7 +57,7 @@ export function projectsReducer(
       return adapter.addMany(action.projects, state)
     case ProjectsActionsTypes.create:
       const project = action.project;
-      project.id = (Math.max(...(<string[]>state.ids).map(it => Number.parseInt(it))) + 1).toString()
+      project.id = (Math.max(...(<string[]>state.ids).map(it => Number.parseInt(it, 10))) + 1).toString()
       return adapter.addOne(project, state)
     case ProjectsActionsTypes.update:
       const update: Update<Project> = {
